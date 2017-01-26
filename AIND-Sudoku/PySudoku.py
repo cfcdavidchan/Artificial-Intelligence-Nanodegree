@@ -9,7 +9,7 @@ rows = 'ABCDEFGHI'
 
 def play(values_list):
     pygame.init()
-
+    
 
     size = width, height = 700, 700
     screen = pygame.display.set_mode(size)
@@ -21,6 +21,7 @@ def play(values_list):
     # The puzzleNumber sets a seed so either generate
     # a random number to fill in here or accept user
     # input for a duplicatable puzzle.
+
 
     for values in values_list:
         pygame.event.pump()
@@ -49,10 +50,23 @@ def play(values_list):
         screen.blit(background_image, (0, 0))
         for num in theSquares:
             num.draw()
-
         pygame.display.flip()
         pygame.display.update()
         clock.tick(5)
+
+    done = False
+    while not done:
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    done = True
+                    pygame.quit()  # break out of the for loop
+            elif event.type == pygame.QUIT:
+                done = True
+                pygame.quit()  # break out of the for loop
+        if done:
+            pygame.quit()
+
 
 
 if __name__ == "__main__":
