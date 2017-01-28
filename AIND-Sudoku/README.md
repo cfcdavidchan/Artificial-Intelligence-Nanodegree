@@ -3,17 +3,30 @@
 
 # Question 1 (Naked Twins)
 Q: How do we use constraint propagation to solve the naked twins problem?  
-A: *Student should provide answer here*
+A:
+
+We can firstly go though all the values inside each box in the sodoku. Then we can run naked twins function to elimate the values inside each box.
+
+Then, naked twins is firstly finding out whether there is any naked twins. If it does exit, the function will try to elimate the value of naked twins from their peers.
+
+Finally, we should repeated the process mentioned above until none of the values that can be elimated
 
 # Question 2 (Diagonal Sudoku)
 Q: How do we use constraint propagation to solve the diagonal sudoku problem?  
-A: *Student should provide answer here*
+A:
 
+Before we go though how to solve he diagonal sudoku problem. One more constraint should be added into the program.
+
+In addition to row_units, column_units and square_units, diagonal_units need to be added into the unitlist.
+
+diagonal_units is containing the units of boxes that are inside the two main diagonals in the sudoku.
+
+After having one more constraint, we can run all the strategies we have to elimate the value of each box repeatedly. The whole program will be stopped until none of the value can be elimated
 ### Install
 
 This project requires **Python 3**.
 
-We recommend students install [Anaconda](https://www.continuum.io/downloads), a pre-packaged Python distribution that contains all of the necessary libraries and software for this project. 
+We recommend students install [Anaconda](https://www.continuum.io/downloads), a pre-packaged Python distribution that contains all of the necessary libraries and software for this project.
 Please try using the environment we provided in the Anaconda lesson of the Nanodegree.
 
 ##### Optional: Pygame
