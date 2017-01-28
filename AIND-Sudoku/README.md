@@ -17,9 +17,7 @@ A:
 
 Before we go though how to solve he diagonal sudoku problem. One more constraint should be added into the program.
 
-In addition to row_units, column_units and square_units, diagonal_units need to be added into the unitlist.
-
-diagonal_units is containing the units of boxes that are inside the two main diagonals in the sudoku.
+In addition to row_units, column_units and square_units, diagonal_units need to be added into the unitlist. Diagonal_units is containing the units of boxes that are inside the two main diagonals in the sudoku.
 
 After having one more constraint, we can run all the strategies we have to elimate the value of each box repeatedly. The whole program will be stopped until none of the value can be elimated
 ### Install
