@@ -123,11 +123,6 @@ class CustomPlayer:
             Board coordinates corresponding to a legal move; may return
             (-1, -1) if there are no available legal moves.
         """
-        self.time_left = time_left
-
-        cutter = self.minimax if self.method == 'minimax' else self.alphabeta
-
-        # TODO: finish this function!
 
         # Perform any required initializations, including selecting an initial
         # move from the game board (i.e., an opening book), or returning
@@ -146,57 +141,33 @@ class CustomPlayer:
         # # Return the best move from the last completed search iteration
         # raise NotImplementedError
 
+        self.time_left = time_left
 
-        #
-        # if self.iterative:
-        #     depth = 0
-        #     while 1:
-        #         for move in legal_moves:
-        #             new_board = game.forecast_move(move)
-        #             score, move = cutter(game, i, float("-inf"), float("inf"), True)
-        #
-        #
+        cutter = self.minimax if self.method == 'minimax' else self.alphabeta
         best_move = (-1, -1)
-        if legal_moves:
-            best_move = legal_moves[0]
-        if not legal_moves:
-            return best_move
+        best_score = float('-inf')
+
+        depth = 0
         try:
-
             if self.iterative:
-                print ('iterative')
-                best_score = float('-inf')
-                best_move = (-1, -1)
-                for move in legal_moves:
-                    new_board = game.forecast_move(move)
-                    i = 1
-                    print (self.search_depth)
-                    while i < self.search_depth:
-                        print ('i:  ', i)
-                        score, cutter_move = cutter(new_board, i ,maximizing_player=False)
-                        print (score)
+                while True:
+                    for move in legal_moves:
+                        score, cutter_move = cutter(game.forecast_move(move), depth, maximizing_player=False)
                         if score > best_score:
-                            best_move = move
                             best_score = score
-
-            if not self.iterative:
-                print(' not iterative')
-                best_score = float('-inf')
-                best_move = (-1, -1)
+                            best_move = move
+                    depth += 1
+            else:
                 for move in legal_moves:
-                    new_board = game.forecast_move(move)
-                    score, cutter_move = cutter(new_board, self.search_depth-1,maximizing_player=False)
+                    score, cutter_move = cutter(game.forecast_move(move), depth, maximizing_player=False)
                     if score > best_score:
-                        best_move = move
                         best_score = score
+                        best_move = move
         except Timeout:
-            print ('sorry about that, time up')
             return best_move
-            pass
 
-        print ('move')
-        print (best_move)
         return best_move
+
 
     def minimax(self, game, depth, maximizing_player=True):
         """Implement the minimax search algorithm as described in the lectures.
