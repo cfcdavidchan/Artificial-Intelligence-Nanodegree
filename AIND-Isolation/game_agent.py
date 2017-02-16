@@ -37,16 +37,17 @@ def custom_score(game, player):
     """
 
     # TODO: finish this function!
-    if game.is_loser(player):
-        return float("-inf")
+    heuristic = 1
+    if heuristic == 1:
+        if game.is_loser(player):
+            return float("-inf")
 
-    if game.is_winner(player):
-        return float("inf")
+        if game.is_winner(player):
+            return float("inf")
 
-    own_moves = len(game.get_legal_moves(player))
-    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
-    return float(own_moves - opp_moves)
-    # raise NotImplementedError
+        own_moves = len(game.get_legal_moves(player))
+        opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+        return float(own_moves - opp_moves)
 
 
 class CustomPlayer:
@@ -142,27 +143,28 @@ class CustomPlayer:
         # raise NotImplementedError
 
         self.time_left = time_left
-
         cutter = self.minimax if self.method == 'minimax' else self.alphabeta
         best_move = (-1, -1)
         best_score = float('-inf')
 
-        depth = 0
+        max_depth = len(game.get_blank_spaces())
         try:
             if self.iterative:
-                while True:
+                for depth in range(0,max_depth+1):
                     for move in legal_moves:
                         score, cutter_move = cutter(game.forecast_move(move), depth, maximizing_player=False)
                         if score > best_score:
                             best_score = score
                             best_move = move
-                    depth += 1
+                return best_move
+
             else:
                 for move in legal_moves:
-                    score, cutter_move = cutter(game.forecast_move(move), depth, maximizing_player=False)
+                    score, cutter_move = cutter(game.forecast_move(move), 0, maximizing_player=False)
                     if score > best_score:
                         best_score = score
                         best_move = move
+                return best_move
         except Timeout:
             return best_move
 
