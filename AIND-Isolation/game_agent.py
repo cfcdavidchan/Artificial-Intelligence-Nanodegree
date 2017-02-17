@@ -37,7 +37,8 @@ def custom_score(game, player):
     """
 
     # TODO: finish this function!
-    heuristic = 1
+    heuristic = 3
+    
     if heuristic == 1:
         if game.is_loser(player):
             return float("-inf")
@@ -48,6 +49,29 @@ def custom_score(game, player):
         own_moves = len(game.get_legal_moves(player))
         opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
         return float(own_moves - opp_moves)
+
+    if heuristic ==2:
+        if game.is_loser(player):
+            return float("-inf")
+
+        if game.is_winner(player):
+            return float("inf")
+
+        own_moves = len(game.get_legal_moves(player))
+        opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+        return float(own_moves/2 - opp_moves)
+
+    if heuristic == 3:
+        if game.is_loser(player):
+            return float("-inf")
+
+        if game.is_winner(player):
+            return float("inf")
+
+        own_moves = len(game.get_legal_moves(player))
+        opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+        total_blank = max_depth = len(game.get_blank_spaces())
+        return float(own_moves/total_blank - opp_moves/total_blank)
 
 
 class CustomPlayer:
