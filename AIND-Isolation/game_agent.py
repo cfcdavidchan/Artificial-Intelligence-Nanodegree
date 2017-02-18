@@ -37,7 +37,7 @@ def custom_score(game, player):
     """
 
     # TODO: finish this function!
-    heuristic = 3
+    heuristic = 2
     
     if heuristic == 1:
         if game.is_loser(player):
