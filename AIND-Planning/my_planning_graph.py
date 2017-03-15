@@ -317,7 +317,7 @@ class PlanningGraph():
                 self.a_levels[level].add(test_action_node)
 
 
-        # TODO add action A level to the planning graph as described in the Russell-Norvig text
+
         # 1. determine what actions to add and create those PgNode_a objects
         # 2. connect the nodes to the previous S literal level
         # for example, the A0 level will iterate through all possible actions for the problem and add a PgNode_a to a_levels[0]
@@ -334,7 +334,7 @@ class PlanningGraph():
         :return:
             adds S nodes to the current level in self.s_levels[level]
         '''
-        # TODO add literal S level to the planning graph as described in the Russell-Norvig text
+
         # 1. determine what literals to add
         # 2. connect the nodes
         # for example, every A node in the previous level has a list of S nodes in effnodes that represent the effect
@@ -448,7 +448,7 @@ class PlanningGraph():
         :param node_a2: PgNode_a
         :return: bool
         '''
-        # TODO test for Interference between nodes
+
         # Check if any effect of A counters B precondition
         for effect_a in node_a1.action.effect_rem:
             for precond_b in node_a2.action.precond_pos:
@@ -519,13 +519,9 @@ class PlanningGraph():
         :param node_s2: PgNode_s
         :return: bool
         '''
-        if node_s1.is_pos:
-            if not node_s2.is_pos:
-                return True
+        if (node_s1.symbol == node_s2.symbol) and node_s1.is_pos != node_s2.is_pos:
+            return True
 
-        if not node_s1.is_pos:
-            if node_s2.is_pos:
-                return True
 
         return False
 
@@ -545,8 +541,6 @@ class PlanningGraph():
         :param node_s2: PgNode_s
         :return: bool
         '''
-        # TODO test for Inconsistent Support between nodes
-
         for precond_a in node_s1.parents:
             for precond_b in node_s2.parents:
                 if not precond_a.is_mutex(precond_b):
@@ -561,7 +555,14 @@ class PlanningGraph():
         :return: int
         '''
         level_sum = 0
-        # TODO implement
+
+        for goal in self.problem.goal:
+            for i in range(len(self.s_levels)):
+                slevel = self.s_levels[i]
+                literals = [s.literal for s in slevel]
+                if goal in literals:
+                    level_sum += i
+                    break
         # for each goal in the problem, determine the level cost, then add them together
 
         return level_sum
