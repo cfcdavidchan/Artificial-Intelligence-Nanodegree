@@ -77,7 +77,19 @@ class SelectorBIC(ModelSelector):
         warnings.filterwarnings("ignore", category=DeprecationWarning)
 
         # TODO implement model selection based on BIC scores
-        raise NotImplementedError
+        all_n_components = range(self.min_n_components, self.max_n_components+1)
+        all_scores = []
+        N, d = self.X.shape
+        for n_components in all_n_components:
+            try:
+                model = self.base_model(n_components)
+                logL = model.score(self.X, self.lengths)
+                bic = -2 * logL + (n_components*(n_components-1) + 2*d*n_components) * np.log(N)
+                all_scores.append(bic)
+            except ValueError:
+                # eliminate non-viable models from consideration
+                all_scores.append(float("inf"))
+        return self.base_model(all_n_components[np.argmin(all_scores)])
 
 
 class SelectorDIC(ModelSelector):
@@ -92,8 +104,30 @@ class SelectorDIC(ModelSelector):
     def select(self):
         warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-        # TODO implement model selection based on DIC scores
-        raise NotImplementedError
+        other_words = set(self.words.keys())
+        other_words.discard(self.this_word)
+        dic_scores = []
+
+        for n_components in range(self.min_n_components, self.max_n_components):
+            # apparently, the hmmlearn library is not able to train or score all models,
+            # so we just skip the models for which we get an exception
+            try:
+                hmm_model = GaussianHMM(n_components=n_components, covariance_type="diag", n_iter=1000,
+                                        random_state=self.random_state, verbose=False).fit(self.X, self.lengths)
+                log_likelihood = hmm_model.score(self.X, self.lengths)  # log likelihood
+                log_antilikelihood = np.average([hmm_model.score(*self.hwords[w]) for w in other_words])
+                dic = log_likelihood - log_antilikelihood
+                dic_scores.append((dic, n_components))
+            except ValueError:
+                if self.verbose:
+                    print("hmmlearn failed to train model on {} with {} states".format(self.this_word, num_states))
+
+        # Use the number of components that maximizes the bic score
+        best_num_components = self.min_n_components
+        if len(dic_scores) > 0:
+            best_num_components = max(dic_scores)[1]
+
+        return self.base_model(best_num_components)
 
 
 class SelectorCV(ModelSelector):
@@ -105,4 +139,25 @@ class SelectorCV(ModelSelector):
         warnings.filterwarnings("ignore", category=DeprecationWarning)
 
         # TODO implement model selection using CV
-        raise NotImplementedError
+        all_n_components = range(self.min_n_components, self.max_n_components+1)
+        split_method = KFold()
+        all_scores = []
+        for n_components in all_n_components:
+            try:
+                scores = []
+                if len(self.sequences) > 2:
+                    for cv_train_idx, cv_test_idx in split_method.split(self.sequences):
+                        # Prepare training sequences
+                        self.X, self.lengths = combine_sequences(cv_train_idx, self.sequences)
+                        # Prepare testing sequences
+                        X_test, lengths_test = combine_sequences(cv_test_idx, self.sequences)
+                        model = self.base_model(n_components)
+                        scores.append(model.score(X_test, lengths_test))
+                    all_scores.append(np.mean(scores))
+                else:
+                    model = self.base_model(n_components)
+                    all_scores.append(model.score(self.X, self.lengths))
+            except ValueError:
+                # eliminate non-viable models from consideration
+                all_scores.append(float("-inf"))
+        return self.base_model(all_n_components[np.argmax(all_scores)])
