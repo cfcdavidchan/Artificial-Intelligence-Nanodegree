@@ -136,28 +136,45 @@ class SelectorCV(ModelSelector):
     '''
 
     def select(self):
-        warnings.filterwarnings("ignore", category=DeprecationWarning)
+                # DONE implement model selection using CV
 
-        # TODO implement model selection using CV
-        all_n_components = range(self.min_n_components, self.max_n_components+1)
-        split_method = KFold()
-        all_scores = []
-        for n_components in all_n_components:
-            try:
-                scores = []
-                if len(self.sequences) > 2:
-                    for cv_train_idx, cv_test_idx in split_method.split(self.sequences):
-                        # Prepare training sequences
-                        self.X, self.lengths = combine_sequences(cv_train_idx, self.sequences)
-                        # Prepare testing sequences
-                        X_test, lengths_test = combine_sequences(cv_test_idx, self.sequences)
-                        model = self.base_model(n_components)
-                        scores.append(model.score(X_test, lengths_test))
-                    all_scores.append(np.mean(scores))
-                else:
-                    model = self.base_model(n_components)
-                    all_scores.append(model.score(self.X, self.lengths))
-            except ValueError:
-                # eliminate non-viable models from consideration
-                all_scores.append(float("-inf"))
-        return self.base_model(all_n_components[np.argmax(all_scores)])
+        warnings.filterwarnings("ignore", category=DeprecationWarning)
+        best_score, best_n_components = None, None
+        for n_components in range(self.min_n_components, self.max_n_components+1):
+            scores, n_splits = [], 3
+            if(len(self.sequences) < 3):
+                try:
+                    model = GaussianHMM(n_components=n_components, n_iter=1000).fit(self.X, self.lengths)
+                    logL = model.score(self.X, self.lengths)
+                    if(best_score is None or logL > best_score):
+                        best_score, best_n_components = logL, n_components
+                except Exception as e:
+                    # Skip cross-validation for current n_components
+                    continue
+            else:
+                split_method = KFold(random_state=self.random_state, n_splits=n_splits)
+                # Split sequences
+                for cv_train_idx, cv_test_idx in split_method.split(self.sequences):
+                    # Generate training & test datasets
+                    X_train, lengths_train = combine_sequences(cv_train_idx, self.sequences)
+                    X_test,  lengths_test  = combine_sequences(cv_test_idx, self.sequences)
+                    try:
+                        # Train & score model with given n_components
+                        model = GaussianHMM(n_components=n_components, n_iter=1000).fit(X_train, lengths_train)
+                        logL = model.score(X_test, lengths_test)
+                        scores.append(logL)
+                    except Exception as e:
+                        # Stop cross-validation for current n_components
+                        break
+    #                    self.print_exception(e, self.this_word, n_components)
+                # Skip best moidel for n_components if training failed
+                training_successful = len(scores) == n_splits
+                if(not training_successful): continue
+                # Calculate current n_components score
+                avg = np.average(scores)
+                # Override best_score if needed
+                if(best_score is None or avg > best_score):
+                    best_score, best_n_components = avg, n_components
+        if(best_score == None):
+            best_n_components = 3
+        return self.base_model(best_n_components)
