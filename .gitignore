@@ -1,5 +1,7 @@
 __pycache__/
+*/__pycache__/
 *.idea/
 *.ipynb_checkpoints
 *.pyc
 .DS_Store
+*.hdf5
