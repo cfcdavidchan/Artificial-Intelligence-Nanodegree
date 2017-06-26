@@ -5,3 +5,11 @@ __pycache__/
 *.pyc
 .DS_Store
 *.hdf5
+# dog project
+dog-project/ms8110@att.com
+dog-project/lfw/
+dog-project/saved_models/weights.best.from_scratch.hdf5
+dog-project/saved_models/weights.best.vgg16.hdf5
+dog-project/bottleneck_features/DogVGG16Data.npz
+*.npz
+*.hdf5
