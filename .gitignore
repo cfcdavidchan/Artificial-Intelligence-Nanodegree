@@ -13,3 +13,4 @@ dog-project/saved_models/weights.best.vgg16.hdf5
 dog-project/bottleneck_features/DogVGG16Data.npz
 *.npz
 *.hdf5
+service-credentials.json
